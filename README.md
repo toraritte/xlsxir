@@ -1,17 +1,26 @@
 # Xlsxir
 
-[![Build Status](https://travis-ci.org/kennellroxco/xlsxir.svg?branch=master)](https://travis-ci.org/kennellroxco/xlsxir)
-[![Hex.pm Version](http://img.shields.io/hexpm/v/xlsxir.svg)](https://hex.pm/packages/xlsxir)
-[![Hex docs](http://img.shields.io/badge/hex.pm-docs-blue.svg?style=flat)](https://hexdocs.pm/xlsxir)
-[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/kennellroxco/xlsxir/master/LICENSE)
+## FUTURES!
+Supervised GenServers for each sheet!
 
-Xlsxir is an Elixir library that parses `.xlsx` files using Simple API for XML (SAX) parsing via the [Erlsom](https://github.com/willemdj/erlsom) Erlang library, extracts the data to an Erlang Term Storage (ETS) process and provides various functions for accessing the data. Xlsxir supports ISO 8601 date formats and large files. 
-
-Testing has been limited to various documents in Microsoft Excel and LibreOffice as well as any issues submitted through GitHub. Only English and Portuguese languages have been tested. A large worksheet containing 100 columns and 514K rows has successfully been parsed. Please submit any issues found and they will be addressed ASAP.
+```elixir
+# path for excel file
+f = Path.join(:code.priv_dir(:xlsxir), "test_workbook.xlsx")
+# load workbook
+{:ok, workbook_pid} = Xlsxir.load(f)
+# view sheet info, to be used for further processing
+Xlsxir.Workbook.sheets()
+[%Xlsxir.Sheet{data: [], id: 3, name: "sheet with space",
+  path: 'worksheets/sheet3.xml', rel_id: "rId3"},
+ %Xlsxir.Sheet{data: [], id: 2, name: "AnotherSheet",
+  path: 'worksheets/sheet2.xml', rel_id: "rId2"},
+ %Xlsxir.Sheet{data: [], id: 1, name: "FirstSheet",
+  path: 'worksheets/sheet1.xml', rel_id: "rId1"}]
+```
 
 ## Installation
 
-You can add Xlsxir as a dependancy to your Elixir project via the Hex package manager by adding the following to your `mix.exs` file: 
+You can add Xlsxir as a dependancy to your Elixir project via the Hex package manager by adding the following to your `mix.exs` file:
 
 ```elixir
 def deps do
@@ -36,15 +45,15 @@ Xlsxir.extract(path, index, timer \\ false)
 Xlsxir.multi_extract(path, index \\ nil, timer \\ false)
 ```
 
-The `multi_extract/3` function allows multiple worksheets to be parsed by creating a separate ETS process for each worksheet and returning a unique table identifier for each. This option will parse all worksheets by default 
-(when `index == nil`), returning a list of tuple results. 
+The `multi_extract/3` function allows multiple worksheets to be parsed by creating a separate ETS process for each worksheet and returning a unique table identifier for each. This option will parse all worksheets by default
+(when `index == nil`), returning a list of tuple results.
 
 Argument descriptions:
 - `path` the path of the file to be parsed in `string` format
 - `index` is the position of the worksheet you wish to parse (zero-based index)
 - `timer` is a boolean flag that controls an extraction timer that returns time elapsed when set to `true`. Defalut value is `false`.
 
-Upon successful completion, the extraction process returns: 
+Upon successful completion, the extraction process returns:
 - for `extract/3`:
     * `:ok` with `timer` set to `false`
     * `{:ok, time_elapsed}` with `timer` set to `true`
@@ -79,11 +88,11 @@ Xlsxir.get_info(table_id, num_type)
 
 Once the table data is no longer needed, run the following function to delete the ETS process and free memory:
 ```elixir
-Xlsxir.close(table_id) 
+Xlsxir.close(table_id)
 ```
 When using `Xlsxir.extract/3`, be sure to [close an open ETS process before trying to parse another worksheet](https://hexdocs.pm/xlsxir/Xlsxir.html#close/0) in the same session or process. If you try to open a new `:worksheet` ETS process when one already exists, you will get an error. If the parsing of multiple worksheets is desired, use `Xlsxir.multi_extract/3` instead.
 
-Refer to [Xlsxir documentation](https://hexdocs.pm/xlsxir/index.html) for more detailed examples. 
+Refer to [Xlsxir documentation](https://hexdocs.pm/xlsxir/index.html) for more detailed examples.
 
 ## Considerations
 
@@ -98,11 +107,11 @@ Cell references are formatted as a string (i.e. "A1"). Strings will be returned 
 
 ## Contributing
 
-Contributions are encouraged. Feel free to fork the repo, add your code along with appropriate tests and documentation (ensuring all existing tests continue to pass) and submit a pull request. 
+Contributions are encouraged. Feel free to fork the repo, add your code along with appropriate tests and documentation (ensuring all existing tests continue to pass) and submit a pull request.
 
 ## Bug Reporting
 
-Please report any bugs or request future enhancements via the [Issues](https://github.com/kennellroxco/xlsxir/issues) page. 
+Please report any bugs or request future enhancements via the [Issues](https://github.com/kennellroxco/xlsxir/issues) page.
 
 ## Acknowledgements
 
@@ -111,4 +120,3 @@ I'd like to thank the following people who were a big help in the development of
 - Paulo Almeida (@pma) was a big help with testing and has provided several great ideas for development.
 - Benjamin Tan's (@benjamintanweihao) article on [SAX parsing with Elrsom](http://benjamintan.io/blog/2014/10/01/parsing-wikipedia-xml-dump-in-elixir-using-erlsom/) was invaluable.
 - Daniel Berkompas' (@danielberkompas) article [Multidimensional Arrays in Elixir](http://blog.danielberkompas.com/2016/04/23/multidimensional-arrays-in-elixir.html?utm_campaign=elixir_radar_48&utm_medium=email&utm_source=RD+Station) inspired `Xlsxir.get_mda/0`.
-                           

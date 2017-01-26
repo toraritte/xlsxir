@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="150" uniqueCount="3">
+  <si>
+    <t>some data</t>
+  </si>
+  <si>
+    <t>datawithbreaks</t>
+  </si>
+  <si>
+    <t>styled</t>
+  </si>
+</sst>
