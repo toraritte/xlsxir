@@ -2,48 +2,35 @@ defmodule Xlsxir.Mixfile do
   use Mix.Project
 
   def project do
-    [
-     app: :xlsxir,
-     version: "1.4.1",
-     name: "Xlsxir",
-     source_url: "https://github.com/kennellroxco/xlsxir",
-     elixir: "~> 1.2",
+    [app: :xlsxir,
+     version: "0.1.0",
+     elixir: "~> 1.4",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
-     description: description,
-     package: package,
-     deps: deps,
-     docs: [main: "overview", extras: ["CHANGELOG.md", "NUMBER_STYLES.md", "OVERVIEW.md"]] 
-    ]
+     deps: deps()]
   end
 
+  # Configuration for the OTP application
+  #
+  # Type "mix help compile.app" for more information
   def application do
-    [applications: [:logger]]
+    # Specify extra applications you'll use from Erlang/Elixir
+    #[extra_applications: [:logger], mod: {Xlsxir.Application, []}]
+    [extra_applications: [:logger],
+     mod: {Xlsxir.Application, []}]
+
   end
 
+  # Dependencies can be Hex packages:
+  #
+  #   {:my_dep, "~> 0.3.0"}
+  #
+  # Or git/path repositories:
+  #
+  #   {:my_dep, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
+  #
+  # Type "mix help deps" for more examples and options
   defp deps do
-    [ 
-      { :ex_doc, github: "elixir-lang/ex_doc", only: :dev },
-      { :earmark, github: "pragdave/earmark", override: true, only: :dev },
-      { :erlsom, "~> 1.4" }
-    ]
+    [{:sweet_xml, "~> 0.6.4"}]
   end
-
-  defp description do
-    """
-    Xlsx file parser. Supports large files, multiple worksheets and ISO 8601 date formats. Data is extracted to an Erlang Term Storage (ETS) table and is accessed through various functions. Tested with Excel and LibreOffice.
-    """
-  end
-
-  defp package do
-    [
-      maintainers: ["Jason Kennell", "Bryan Weatherly"],
-      licenses: ["MIT License"],
-      links: %{
-                "Github" => "https://github.com/kennellroxco/xlsxir",
-                "Change Log" => "https://hexdocs.pm/xlsxir/changelog.html"
-               }
-    ]
-  end
-  
 end
