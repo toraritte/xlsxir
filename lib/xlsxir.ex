@@ -1,5 +1,4 @@
 defmodule Xlsxir do
-  use Application
   @moduledoc """
   Application module, probably not necessary...
   Not sure if necessary, can start with `Xlsxir.Workbook.load(args)`
@@ -14,11 +13,12 @@ defmodule Xlsxir do
 
   """
   def load(workbook) do
-    start(:normal, [path: workbook])
+    wb = String.to_charlist(workbook)
+    {:ok, handle} = :zip.zip_open(wb  ,[:memory])
+    {:ok, pid} = Supervisor.start_child(Xlsxir.Supervisor, Supervisor.Spec.worker(Xlsxir.Zip, [[zip: handle, path: wb]], [name: Xlsxir.Zip]))
+
+    {:ok, pid} = Supervisor.start_child(Xlsxir.Supervisor, Supervisor.Spec.supervisor(Xlsxir.Workbook, [[handle: handle]], []))
   end
 
 
-  def start(_type, args) do
-    Xlsxir.Workbook.start_link(args)
-  end
 end

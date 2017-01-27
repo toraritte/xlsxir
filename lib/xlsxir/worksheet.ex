@@ -1,13 +1,14 @@
-defmodule Xlsxir.Sheet do
-  defstruct name: nil, rel_id: nil, id: nil, path: nil, data: []
-  @type t :: %__MODULE__{name: String.t, rel_id: String.t, id: integer, path: iolist, data: []}
-end
-
-
 defmodule Xlsxir.Worksheet do
   @moduledoc """
-  Documentation for Xlsxir.Workbook
+  Documentation for Xlsxir.Worksheet
   """
+
+  @doc """
+  Worksheet struct
+  """
+  defstruct name: nil, rel_id: nil, id: nil, path: nil, data: []
+  @type t :: %__MODULE__{name: String.t, rel_id: String.t, id: integer, path: iolist, data: []}
+
   use GenServer
 
   def init(args) do
