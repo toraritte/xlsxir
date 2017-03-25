@@ -4,6 +4,72 @@ defmodule Xlsxir.Unzip do
   Provides validation of accepted file types for file path, extracts required `.xlsx` contents to `./temp` and ultimately deletes the `./temp` directory and its contents.
   """
 
+  defmodule A do
+  # TODO: missing error wrappers at the endpoints
+  def crucial_XMLs(path) do
+    p =
+      path
+      |> String.to_char_list()
+
+    {:ok, [_|zip_file_list]} = :zip.list_dir(p)
+
+    zip_file_list
+      |> Enum.reduce([], &to_needed_xmls/2)
+      |> Enum.split_with(&String.match?(&1,~r/sheet/))
+  end
+
+  defp to_needed_xmls({:zip_file, fname, _,_,_,_}, acc) do
+    re = ~r|^xl/(worksheets/sheet\|sharedStrings.xml\|styles.xml)|
+
+    needed =
+      fname
+      |> to_string
+      |> String.match?(re)
+
+    case needed do
+      true  -> [to_string(fname)|acc]
+      false -> acc
+    end
+  end
+
+  #                                             any :zip.extract/2 option
+  def unzip_worksheets(path, indices \\ [], opts \\ [:memory])
+
+  def unzip_worksheets(path, indices, opts) do
+    {worksheets, others} = crucial_XMLs(path)
+
+    chosen_worksheets = filter_worksheets(worksheets, indices)
+
+    p = to_charlist(path)
+    file_list =
+      chosen_worksheets ++ others
+      |> Enum.map(&to_charlist(&1))
+    opts = [{:file_list, file_list}] ++ opts
+
+    :zip.extract(p, opts)
+  end
+
+  defp filter_worksheets(worksheets, indices) do
+      case indices == [] do
+        true  ->
+          worksheets
+        false ->
+          worksheets
+          |> Enum.with_index
+          |> Enum.filter_map(
+              fn({_,i}) -> Enum.member?(indices,i) end,
+              fn({v,_}) -> v end
+            )
+      end
+    end
+
+    def number_of_worksheets(path) do
+      {worksheets,_} = crucial_XMLs(path)
+      length(worksheets)
+    end
+  end
+  {:ok,l } = A.unzip_worksheets("../../../agulyas_timesheet.xlsx") 
+
   @doc """
   Checks if given path is a valid file type and contains the requested worksheet, returning a tuple.
 
@@ -31,6 +97,30 @@ defmodule Xlsxir.Unzip do
     case valid_extract_request?(path, index) do
       :ok              -> {:ok, path}
       {:error, reason} -> {:error, reason}
+    end
+  end
+
+  defp valid_extract_request?(path, index) do
+    case :zip.list_dir(path) do
+      {:ok, file_list}  -> search_file_list(file_list, index)
+      {:error, _reason} -> {:error, "Invalid file type."}
+    end
+  end
+
+  defp search_file_list(file_list, index) do
+    sheet   = 'xl/worksheets/sheet#{index + 1}.xml'
+    results = file_list
+              |> Enum.map(fn file ->
+                   case file do
+                     {:zip_file, ^sheet, _, _, _, _} -> :ok
+                     _                               -> nil
+                   end
+                 end)
+
+    if Enum.member?(results, :ok) do
+      :ok
+    else
+      {:error, "Invalid worksheet index."}
     end
   end
 
@@ -76,30 +166,6 @@ defmodule Xlsxir.Unzip do
         |> Enum.sort
         {:ok, indexes}
       {:error, _reason} -> {:error, "Invalid file type."}
-    end
-  end
-
-  defp valid_extract_request?(path, index) do
-    case :zip.list_dir(path) do
-      {:ok, file_list}  -> search_file_list(file_list, index)
-      {:error, _reason} -> {:error, "Invalid file type."}
-    end
-  end
-
-  defp search_file_list(file_list, index) do
-    sheet   = 'xl/worksheets/sheet#{index + 1}.xml'
-    results = file_list
-              |> Enum.map(fn file ->
-                   case file do
-                     {:zip_file, ^sheet, _, _, _, _} -> :ok
-                     _                               -> nil
-                   end
-                 end)
-
-    if Enum.member?(results, :ok) do
-      :ok
-    else
-      {:error, "Invalid worksheet index."}
     end
   end
 
